@@ -27,14 +27,11 @@
         '</ion-modal-view>';
       return modalTemplate;
     }
-    var queryPage = function(url, pagination, searchStr){
+    var queryPage = function(url, data){
       return $q(function (resolve) {
         var options = {
           url: url,
-          data: {
-            searchStr: searchStr,
-            "pageNum": pagination.nextPage()
-          }
+          data: data
         };
         cyCors.ajax(options, function (response) {
           resolve(response.data);
@@ -57,7 +54,12 @@
         scope.doSearch = function (filterText, loadNextPage) {
           if(filterText && filterText != ''){
             if(!loadNextPage) scope.pagination = new whcyit.Pagination();
-            queryPage(opts.url, scope.pagination, filterText).then(function(page) {
+            var data = {
+              searchStr: filterText
+            }
+            if(opts.createParams) data = opts.createParams(filterText);
+            data.pageNum = scope.pagination.nextPage();
+            queryPage(opts.url, data).then(function(page) {
               scope.pagination.hasNext = page.hasNextPage;
               scope.pagination.items = scope.pagination.items.concat(page.items);
               if(loadNextPage){
